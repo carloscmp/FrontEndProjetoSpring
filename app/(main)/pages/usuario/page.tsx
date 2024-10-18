@@ -16,6 +16,8 @@ import { classNames } from 'primereact/utils';
 import React, { useEffect, useRef, useState } from 'react';
 import { ProductService } from '../../../../demo/service/ProductService';
 import { Projeto } from '@/types';
+import { UsuarioService } from '@/service/UsuarioService';
+import { error } from 'console';
 
 /* @todo Used 'as any' for types here. Will fix in next version due to onSelectionChange event type issue. */
 const Crud = () => {
@@ -37,9 +39,17 @@ const Crud = () => {
     const [globalFilter, setGlobalFilter] = useState('');
     const toast = useRef<Toast>(null);
     const dt = useRef<DataTable<any>>(null);
+    const usuarioService = new UsuarioService();
 
     useEffect(() => {
         //ProductService.getProducts().then((data) => setProducts(data as any));
+        usuarioService.listasTodos()
+        .then((response) => {
+            console.log(response.data);
+            setUsuarios(response.data);
+        }).catch((error)=>{
+            console.log(error);
+        })
     }, []);
 
     /*const formatCurrency = (value: number) => {
@@ -176,7 +186,7 @@ const Crud = () => {
      const onInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, name: string) => {
       const val = (e.target && e.target.value) || '';
         let _usuario = { ...usuario };
-        _usuario[`${name}`] = val;
+       // _usuario[`${name}`] = val;
 
         setUsuario(_usuario);
      };
