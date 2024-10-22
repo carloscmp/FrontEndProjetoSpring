@@ -5,59 +5,49 @@ import { Column } from 'primereact/column';
 import { DataTable } from 'primereact/datatable';
 import { Dialog } from 'primereact/dialog';
 import { FileUpload } from 'primereact/fileupload';
-import { InputNumber, InputNumberValueChangeEvent } from 'primereact/inputnumber';
 import { InputText } from 'primereact/inputtext';
-import { InputTextarea } from 'primereact/inputtextarea';
-import { RadioButton, RadioButtonChangeEvent } from 'primereact/radiobutton';
-import { Rating } from 'primereact/rating';
 import { Toast } from 'primereact/toast';
 import { Toolbar } from 'primereact/toolbar';
 import { classNames } from 'primereact/utils';
-import React, { useEffect, useRef, useState } from 'react';
-import { ProductService } from '../../../../demo/service/ProductService';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Projeto } from '@/types';
 import { UsuarioService } from '@/service/UsuarioService';
-import { error } from 'console';
+
 
 /* @todo Used 'as any' for types here. Will fix in next version due to onSelectionChange event type issue. */
-const Crud = () => {
+const Usuario = () => {
     let usuarioVazio: Projeto.Usuario = {
         id: 0,
         nome: '',
-        login:'',
-        senha:'',
-        email:''
+        login: '',
+        senha: '',
+        email: ''
     };
 
-    const [usuarios, setUsuarios] = useState(null);
+    const [usuarios, setUsuarios] = useState<Projeto.Usuario[]>([]);
     const [usuarioDialog, setUsuarioDialog] = useState(false);
     const [deleteUsuarioDialog, setDeleteUsuarioDialog] = useState(false);
     const [deleteUsuariosDialog, setDeleteUsuariosDialog] = useState(false);
     const [usuario, setUsuario] = useState<Projeto.Usuario>(usuarioVazio);
-    const [selectedUsuarios, setSelectedUsuarios] = useState(null);
+    const [selectedUsuarios, setSelectedUsuarios] = useState<Projeto.Usuario[]>([]);
     const [submitted, setSubmitted] = useState(false);
     const [globalFilter, setGlobalFilter] = useState('');
     const toast = useRef<Toast>(null);
     const dt = useRef<DataTable<any>>(null);
-    const usuarioService = new UsuarioService();
+    const usuarioService = useMemo(() => new UsuarioService(), []);
 
     useEffect(() => {
-        //ProductService.getProducts().then((data) => setProducts(data as any));
-        usuarioService.listasTodos()
-        .then((response) => {
-            console.log(response.data);
-            setUsuarios(response.data);
-        }).catch((error)=>{
-            console.log(error);
-        })
-    }, []);
+        if (usuarios.length == 0) {
+            usuarioService.listasTodos()
+                .then((response) => {
+                    console.log(response.data);
+                    setUsuarios(response.data);
+                }).catch((error) => {
+                    console.log(error);
+                })
+        }
 
-    /*const formatCurrency = (value: number) => {
-        return value.toLocaleString('en-US', {
-            style: 'currency',
-            currency: 'USD'
-        });
-    };*/
+    }, [usuarioService, usuarios]);
 
     const openNew = () => {
         setUsuario(usuarioVazio);
@@ -79,37 +69,49 @@ const Crud = () => {
     };
 
     const saveUsuario = () => {
-    //     setSubmitted(true);
+        setSubmitted(true);
 
-    //     if (usuario.nome.trim()) {
-    //         let _products = [...(usuarios as any)];
-    //         let _usuario = { ...usuario };
-    //         if (usuario.id) {
-    //             const index = findIndexById(usuario.id);
-
-    //             _products[index] = _usuario;
-    //             toast.current?.show({
-    //                 severity: 'success',
-    //                 summary: 'Successful',
-    //                 detail: 'Product Updated',
-    //                 life: 3000
-    //             });
-    //         } else {
-    //             _usuario.id = createId();
-    //             _usuario.image = 'product-placeholder.svg';
-    //             _products.push(_usuario);
-    //             toast.current?.show({
-    //                 severity: 'success',
-    //                 summary: 'Successful',
-    //                 detail: 'Product Created',
-    //                 life: 3000
-    //             });
-    //         }
-
-            // setUsuario(_products as any);
-            // setUsuarioDialog(false);
-            // setUsuario(usuarioVazio);
-        //}
+        if (!usuario.id) {
+            usuarioService.inserir(usuario)
+                .then((response) => {
+                    //setUsuarios(response.data);
+                    setUsuario(usuarioVazio);
+                    setUsuarioDialog(false);
+                    setUsuarios([]);
+                    toast.current?.show({
+                        severity: 'success',
+                        summary: 'Successo',
+                        detail: 'Usuário Cadastrado com sucesso'
+                    });
+                }).catch((error) => {
+                    console.log(error.data.message);
+                    toast.current?.show({
+                        severity: 'error',
+                        summary: 'Erro!',
+                        detail: 'Erro ao salvar usuário' + error.data.message
+                    });
+                })
+        } else {
+            usuarioService.alterar(usuario)
+                .then((response) => {
+                    //setUsuarios(response.data);
+                    setUsuario(usuarioVazio);
+                    setUsuarioDialog(false);
+                    setUsuarios([]);
+                    toast.current?.show({
+                        severity: 'success',
+                        summary: 'Successo',
+                        detail: 'Usuário Alterado com sucesso'
+                    });
+                }).catch((error) => {
+                    console.log(error.data.message);
+                    toast.current?.show({
+                        severity: 'error',
+                        summary: 'Erro!',
+                        detail: 'Erro ao alterar usuário' + error.data.message
+                    })
+                })
+        }
     };
 
     const editUsuario = (usuario: Projeto.Usuario) => {
@@ -117,44 +119,32 @@ const Crud = () => {
         setUsuarioDialog(true);
     };
 
-    const confirmDeleteUsuario = (product: Projeto.Usuario) => {
+    const confirmDeleteUsuario = (usuario: Projeto.Usuario) => {
         setUsuario(usuario);
         setDeleteUsuarioDialog(true);
     };
 
     const deleteUsuario = () => {
-        // let _products = (products as any)?.filter((val: any) => val.id !== product.id);
-        // setProducts(_products);
-        // setDeleteProductDialog(false);
-        // setProduct(emptyProduct);
-        // toast.current?.show({
-        //     severity: 'success',
-        //     summary: 'Successful',
-        //     detail: 'Product Deleted',
-        //     life: 3000
-        // });
+        if (usuario.id) {
+            usuarioService.excluir(usuario.id)
+                .then((response) => {
+                    setUsuario(usuarioVazio);
+                    setDeleteUsuarioDialog(false);
+                    setUsuarios([]);
+                    toast.current?.show({
+                        severity: 'success',
+                        summary: 'Successo',
+                        detail: 'Usuario deletado com sucesso',
+                    });
+                }).catch((error) => {
+                    toast.current?.show({
+                        severity: 'error',
+                        summary: 'Erro!',
+                        detail: 'Erro ao deletar usuario',
+                    });
+                });
+        }
     };
-
-    // const findIndexById = (id: string) => {
-    //     let index = -1;
-    //     for (let i = 0; i < (products as any)?.length; i++) {
-    //         if ((products as any)[i].id === id) {
-    //             index = i;
-    //             break;
-    //         }
-    //     }
-
-    //     return index;
-    // };
-
-    // const createId = () => {
-    //     let id = '';
-    //     let chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    //     for (let i = 0; i < 5; i++) {
-    //         id += chars.charAt(Math.floor(Math.random() * chars.length));
-    //     }
-    //     return id;
-    // };
 
     const exportCSV = () => {
         dt.current?.exportCSV();
@@ -165,39 +155,40 @@ const Crud = () => {
     };
 
     const deleteSelectedUsuarios = () => {
-        // let _products = (usuarios as any)?.filter((val: any) => !(selectedUsuarios as any)?.includes(val));
-        // setUsuarios(_products);
-        // setDeleteUsuariosDialog(false);
-        // setSelectedUsuarios(null);
-        // toast.current?.show({
-        //     severity: 'success',
-        //     summary: 'Successful',
-        //     detail: 'Products Deleted',
-        //     life: 3000
-        // });
+
+        Promise.all(selectedUsuarios.map(async (_usuario) => {
+            if (_usuario.id) {
+                await usuarioService.excluir(_usuario.id)
+
+            }
+        })).then((response) => {
+            setUsuarios([]);
+            setSelectedUsuarios([]);
+            setDeleteUsuariosDialog(false);
+            toast.current?.show({
+                severity: 'success',
+                summary: 'Successo',
+                detail: 'Usuarios deletados com sucesso',
+                life: 3000
+            });
+        }).catch((error) => {
+            toast.current?.show({
+                severity: 'error',
+                summary: 'Erro',
+                detail: 'Erro ao deletar Usuarios',
+                life: 3000
+            });
+        });
     };
-
-    // const onCategoryChange = (e: RadioButtonChangeEvent) => {
-    //     let _product = { ...product };
-    //     _product['category'] = e.value;
-    //     setProduct(_product);
-    // };
-
-     const onInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, name: string) => {
-      const val = (e.target && e.target.value) || '';
+    const onInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, name: string) => {
+        const val = (e.target && e.target.value) || '';
         let _usuario = { ...usuario };
-       // _usuario[`${name}`] = val;
+        _usuario[`${name}`] = val;
 
         setUsuario(_usuario);
-     };
+    };
 
-    // const onInputNumberChange = (e: InputNumberValueChangeEvent, name: string) => {
-    //     const val = e.value || 0;
-    //     let _product = { ...product };
-    //     _product[`${name}`] = val;
 
-    //     setProduct(_product);
-    // };
 
     const leftToolbarTemplate = () => {
         return (
@@ -245,7 +236,7 @@ const Crud = () => {
             </>
         );
     };
-    
+
     const emailBodyTemplate = (rowData: Projeto.Usuario) => {
         return (
             <>
@@ -256,13 +247,13 @@ const Crud = () => {
     };
 
     const imageBodyTemplate = (rowData: Projeto.Usuario) => {
-    //     return (
-    //         <>
-    //             <span className="p-column-title">Image</span>
-    //             <img src={`/demo/images/product/${rowData.image}`} alt={rowData.image} className="shadow-2" width="100" />
-    //         </>
-    //     );
-    // };
+        //     return (
+        //         <>
+        //             <span className="p-column-title">Image</span>
+        //             <img src={`/demo/images/product/${rowData.image}`} alt={rowData.image} className="shadow-2" width="100" />
+        //         </>
+        //     );
+        // };
 
         // const priceBodyTemplate = (rowData: Demo.Product) => {
         //     return (
@@ -271,34 +262,34 @@ const Crud = () => {
         //             {formatCurrency(rowData.price as number)}
         //         </>
         //     );
-         };
+    };
 
     const categoryBodyTemplate = (rowData: Projeto.Usuario) => {
-    //     return (
-    //         <>
-    //             <span className="p-column-title">Category</span>
-    //             {rowData.category}
-    //         </>
-    //     );
-    // };
+        //     return (
+        //         <>
+        //             <span className="p-column-title">Category</span>
+        //             {rowData.category}
+        //         </>
+        //     );
+        // };
 
-    // const ratingBodyTemplate = (rowData: Demo.Product) => {
-    //     return (
-    //         <>
-    //             <span className="p-column-title">Reviews</span>
-    //             <Rating value={rowData.rating} readOnly cancel={false} />
-    //         </>
-    //     );
-    // };
+        // const ratingBodyTemplate = (rowData: Demo.Product) => {
+        //     return (
+        //         <>
+        //             <span className="p-column-title">Reviews</span>
+        //             <Rating value={rowData.rating} readOnly cancel={false} />
+        //         </>
+        //     );
+        // };
 
-    // const statusBodyTemplate = (rowData: Demo.Product) => {
-    //     return (
-    //         <>
-    //             <span className="p-column-title">Status</span>
-    //             <span className={`product-badge status-${rowData.inventoryStatus?.toLowerCase()}`}>{rowData.inventoryStatus}</span>
-    //         </>
-    //     );
-     };
+        // const statusBodyTemplate = (rowData: Demo.Product) => {
+        //     return (
+        //         <>
+        //             <span className="p-column-title">Status</span>
+        //             <span className={`product-badge status-${rowData.inventoryStatus?.toLowerCase()}`}>{rowData.inventoryStatus}</span>
+        //         </>
+        //     );
+    };
 
     const actionBodyTemplate = (rowData: Projeto.Usuario) => {
         return (
@@ -367,13 +358,13 @@ const Crud = () => {
                         <Column field="nome" header="Nome" sortable body={nomeBodyTemplate} headerStyle={{ minWidth: '15rem' }}></Column>
                         <Column field="login" header="Login" sortable body={loginBodyTemplate} headerStyle={{ minWidth: '15rem' }}></Column>
                         <Column field="email" header="E-mail" sortable body={emailBodyTemplate} headerStyle={{ minWidth: '15rem' }}></Column>
-                       
+
 
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
                     </DataTable>
 
                     <Dialog visible={usuarioDialog} style={{ width: '450px' }} header="Detalhes de Usuário" modal className="p-fluid" footer={usuarioDialogFooter} onHide={hideDialog}>
-                       
+
                         <div className="field">
                             <label htmlFor="nome">Nome</label>
                             <InputText
@@ -387,7 +378,7 @@ const Crud = () => {
                                 })}
                             />
                             {submitted && !usuario.nome && <small className="p-invalid">Nome é obrigatório.</small>}
-                        </div>    
+                        </div>
 
                         <div className="field">
                             <label htmlFor="login">Login</label>
@@ -396,47 +387,41 @@ const Crud = () => {
                                 value={usuario.login}
                                 onChange={(e) => onInputChange(e, 'login')}
                                 required
-                                autoFocus
                                 className={classNames({
                                     'p-invalid': submitted && !usuario.login
                                 })}
                             />
                             {submitted && !usuario.login && <small className="p-invalid">Login é obrigatório.</small>}
-                        </div> 
+                        </div>
 
                         <div className="field">
                             <label htmlFor="senha">Senha</label>
                             <InputText
                                 id="senha"
-                                value={usuario.nome}
+                                value={usuario.senha}
                                 onChange={(e) => onInputChange(e, 'senha')}
                                 required
-                                autoFocus
                                 className={classNames({
                                     'p-invalid': submitted && !usuario.senha
                                 })}
                             />
                             {submitted && !usuario.senha && <small className="p-invalid">Senha é obrigatório.</small>}
-                        </div>    
+                        </div>
 
                         <div className="field">
                             <label htmlFor="email">E-mail</label>
                             <InputText
                                 id="email"
-                                value={usuario.nome}
+                                value={usuario.email}
                                 onChange={(e) => onInputChange(e, 'email')}
                                 required
-                                autoFocus
                                 className={classNames({
                                     'p-invalid': submitted && !usuario.email
                                 })}
                             />
                             {submitted && !usuario.email && <small className="p-invalid">E-mail é obrigatório.</small>}
-                        </div>                      
+                        </div>
 
-                        
-
-                       
                     </Dialog>
 
                     <Dialog visible={deleteUsuarioDialog} style={{ width: '450px' }} header="Confirm" modal footer={deleteUsuarioDialogFooter} onHide={hideDeleteUsuarioDialog}>
@@ -461,5 +446,5 @@ const Crud = () => {
         </div>
     );
 };
+export default Usuario;
 
-export default Crud;
