@@ -10,7 +10,7 @@ import { Toast } from 'primereact/toast';
 import { Toolbar } from 'primereact/toolbar';
 import { classNames } from 'primereact/utils';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Projeto } from '@/types';
+import { Projeto } from '@/types/types';
 import { RecursoService } from '@/service/RecursoService';
 
 
@@ -22,7 +22,7 @@ const Recurso = () => {
         chave: ''
     };
 
-    const [recursos, setRecursos] = useState<Projeto.Recurso[]>([]);
+    const [recursos, setRecursos] = useState<Projeto.Recurso[] | null>([]);
     const [recursoDialog, setRecursoDialog] = useState(false);
     const [deleteRecursoDialog, setDeleteRecursoDialog] = useState(false);
     const [deleteRecursosDialog, setDeleteRecursosDialog] = useState(false);
@@ -35,7 +35,7 @@ const Recurso = () => {
     const recursoService = useMemo(() => new RecursoService(), []);
 
     useEffect(() => {
-        if (recursos.length == 0) {
+        if (!recursos) {
             recursoService.listasTodos()
                 .then((response) => {
                     console.log(response.data);
@@ -75,7 +75,7 @@ const Recurso = () => {
                     //setRecursos(response.data);
                     setRecurso(recursoVazio);
                     setRecursoDialog(false);
-                    setRecursos([]);
+                    setRecursos(null);
                     toast.current?.show({
                         severity: 'success',
                         summary: 'Successo',
@@ -95,7 +95,7 @@ const Recurso = () => {
                     //setRecursos(response.data);
                     setRecurso(recursoVazio);
                     setRecursoDialog(false);
-                    setRecursos([]);
+                    setRecursos(null);
                     toast.current?.show({
                         severity: 'success',
                         summary: 'Successo',
@@ -130,7 +130,7 @@ const Recurso = () => {
                 .then((response) => {
                     setRecurso(recursoVazio);
                     setDeleteRecursoDialog(false);
-                    setRecursos([]);
+                    setRecursos(null);
                     toast.current?.show({
                         severity: 'success',
                         summary: 'Successo',
@@ -163,7 +163,7 @@ const Recurso = () => {
 
             }
         })).then((response) => {
-            setRecursos([]);
+            setRecursos(null);
             setSelectedRecursos([]);
             setDeleteRecursosDialog(false);
             toast.current?.show({
@@ -186,7 +186,7 @@ const Recurso = () => {
         let _recurso = { ...recurso };
         _recurso[`${name}`] = val;
 
-        setRecurso(_recurso) ;
+        setRecurso(_recurso);
 
         // setRecursos(prevRecurso=>({
         //     ...prevRecurso,
