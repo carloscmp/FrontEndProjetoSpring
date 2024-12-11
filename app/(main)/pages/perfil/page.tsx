@@ -35,15 +35,14 @@ const Perfil = () => {
 
     useEffect(() => {
         if (!perfis) {
-            perfilService.listasTodos()
+            perfilService.listarTodos()
                 .then((response) => {
                     console.log(response.data);
-                    setPerfils(response.data);
+                    setPerfils(response.data);      
                 }).catch((error) => {
                     console.log(error);
                 })
         }
-
     }, [perfilService, perfis]);
 
     const openNew = () => {

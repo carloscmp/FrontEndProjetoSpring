@@ -22,7 +22,7 @@ const Recurso = () => {
         chave: ''
     };
 
-    const [recursos, setRecursos] = useState<Projeto.Recurso[] | null>([]);
+    const [recursos, setRecursos] = useState<Projeto.Recurso[] | null>(null);
     const [recursoDialog, setRecursoDialog] = useState(false);
     const [deleteRecursoDialog, setDeleteRecursoDialog] = useState(false);
     const [deleteRecursosDialog, setDeleteRecursosDialog] = useState(false);
@@ -36,7 +36,7 @@ const Recurso = () => {
 
     useEffect(() => {
         if (!recursos) {
-            recursoService.listasTodos()
+            recursoService.listarTodos()
                 .then((response) => {
                     console.log(response.data);
                     setRecursos(response.data);
@@ -44,7 +44,6 @@ const Recurso = () => {
                     console.log(error);
                 })
         }
-
     }, [recursoService, recursos]);
 
     const openNew = () => {
@@ -72,45 +71,43 @@ const Recurso = () => {
         if (!recurso.id) {
             recursoService.inserir(recurso)
                 .then((response) => {
-                    //setRecursos(response.data);
-                    setRecurso(recursoVazio);
                     setRecursoDialog(false);
+                    setRecurso(recursoVazio);
                     setRecursos(null);
                     toast.current?.show({
-                        severity: 'success',
-                        summary: 'Successo',
-                        detail: 'Usuário Cadastrado com sucesso'
+                        severity: 'info',
+                        summary: 'Sucesso!',
+                        detail: 'Recurso cadastrado com sucesso!'
                     });
                 }).catch((error) => {
                     console.log(error.data.message);
                     toast.current?.show({
                         severity: 'error',
                         summary: 'Erro!',
-                        detail: 'Erro ao salvar usuário' + error.data.message
-                    });
-                })
+                        detail: 'Erro ao salvar!' + error.data.message
+                    })
+                });
         } else {
             recursoService.alterar(recurso)
                 .then((response) => {
-                    //setRecursos(response.data);
-                    setRecurso(recursoVazio);
                     setRecursoDialog(false);
+                    setRecurso(recursoVazio);
                     setRecursos(null);
                     toast.current?.show({
-                        severity: 'success',
-                        summary: 'Successo',
-                        detail: 'Usuário Alterado com sucesso'
+                        severity: 'info',
+                        summary: 'Sucesso!',
+                        detail: 'Recurso alterado com sucesso!'
                     });
                 }).catch((error) => {
                     console.log(error.data.message);
                     toast.current?.show({
                         severity: 'error',
                         summary: 'Erro!',
-                        detail: 'Erro ao alterar usuário' + error.data.message
+                        detail: 'Erro ao alterar!' + error.data.message
                     })
                 })
         }
-    };
+    }
 
     const editRecurso = (recurso: Projeto.Recurso) => {
         setRecurso({ ...recurso });
@@ -123,27 +120,27 @@ const Recurso = () => {
     };
 
     const deleteRecurso = () => {
-        console.log('deleteRecurso')
+        console.log('deleteRecurso');
         console.log(recurso.id);
         if (recurso.id) {
-            recursoService.excluir(recurso.id)
-                .then((response) => {
-                    setRecurso(recursoVazio);
-                    setDeleteRecursoDialog(false);
-                    setRecursos(null);
-                    toast.current?.show({
-                        severity: 'success',
-                        summary: 'Successo',
-                        detail: 'Recurso deletado com sucesso',
-                        life: 3000
-                    });
-                }).catch((error) => {
-                    toast.current?.show({
-                        severity: 'error',
-                        summary: 'Erro!',
-                        detail: 'Erro ao deletar recurso',
-                    });
+            recursoService.excluir(recurso.id).then((response) => {
+                setRecurso(recursoVazio);
+                setDeleteRecursoDialog(false);
+                setRecursos(null);
+                toast.current?.show({
+                    severity: 'success',
+                    summary: 'Sucesso!',
+                    detail: 'Recurso Deletado com Sucesso!',
+                    life: 3000
                 });
+            }).catch((error) => {
+                toast.current?.show({
+                    severity: 'error',
+                    summary: 'Erro!',
+                    detail: 'Erro ao deletar o recurso!',
+                    life: 3000
+                });
+            });
         }
     };
 
@@ -187,14 +184,7 @@ const Recurso = () => {
         _recurso[`${name}`] = val;
 
         setRecurso(_recurso);
-
-        // setRecursos(prevRecurso=>({
-        //     ...prevRecurso,
-        //     [name]: val,
-        // }));
     };
-
-
 
     const leftToolbarTemplate = () => {
         return (
@@ -241,51 +231,6 @@ const Recurso = () => {
                 {rowData.chave}
             </>
         );
-    };
-
-    const imageBodyTemplate = (rowData: Projeto.Recurso) => {
-        //     return (
-        //         <>
-        //             <span className="p-column-title">Image</span>
-        //             <img src={`/demo/images/product/${rowData.image}`} alt={rowData.image} className="shadow-2" width="100" />
-        //         </>
-        //     );
-        // };
-
-        // const priceBodyTemplate = (rowData: Demo.Product) => {
-        //     return (
-        //         <>
-        //             <span className="p-column-title">Price</span>
-        //             {formatCurrency(rowData.price as number)}
-        //         </>
-        //     );
-    };
-
-    const categoryBodyTemplate = (rowData: Projeto.Recurso) => {
-        //     return (
-        //         <>
-        //             <span className="p-column-title">Category</span>
-        //             {rowData.category}
-        //         </>
-        //     );
-        // };
-
-        // const ratingBodyTemplate = (rowData: Demo.Product) => {
-        //     return (
-        //         <>
-        //             <span className="p-column-title">Reviews</span>
-        //             <Rating value={rowData.rating} readOnly cancel={false} />
-        //         </>
-        //     );
-        // };
-
-        // const statusBodyTemplate = (rowData: Demo.Product) => {
-        //     return (
-        //         <>
-        //             <span className="p-column-title">Status</span>
-        //             <span className={`product-badge status-${rowData.inventoryStatus?.toLowerCase()}`}>{rowData.inventoryStatus}</span>
-        //         </>
-        //     );
     };
 
     const actionBodyTemplate = (rowData: Projeto.Recurso) => {
@@ -344,9 +289,9 @@ const Recurso = () => {
                         rowsPerPageOptions={[5, 10, 25]}
                         className="datatable-responsive"
                         paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-                        currentPageReportTemplate="Mostrando {first} até {last} de {totalRecords} usuários"
+                        currentPageReportTemplate="Mostrando {first} até {last} de {totalRecords} recursos"
                         globalFilter={globalFilter}
-                        emptyMessage="Recurso não encontrando."
+                        emptyMessage="Nenhum recurso encontrado."
                         header={header}
                         responsiveLayout="scroll"
                     >
@@ -354,7 +299,6 @@ const Recurso = () => {
                         <Column field="id" header="Código" sortable body={idBodyTemplate} headerStyle={{ minWidth: '15rem' }}></Column>
                         <Column field="nome" header="Nome" sortable body={nomeBodyTemplate} headerStyle={{ minWidth: '15rem' }}></Column>
                         <Column field="chave" header="Chave" sortable body={chaveBodyTemplate} headerStyle={{ minWidth: '15rem' }}></Column>
-
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
                     </DataTable>
 

@@ -36,7 +36,7 @@ const Usuario = () => {
 
     useEffect(() => {
         if (!usuarios) {
-            usuarioService.listasTodos()
+            usuarioService.listarTodos()
                 .then((response) => {
                     console.log(response.data);
                     setUsuarios(response.data);

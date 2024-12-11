@@ -12,7 +12,7 @@ export class BaseService {
         this.url = url;
     }
 
-    listasTodos() {
+    listarTodos() {
         return axiosInstance.get(this.url);
     }
 
